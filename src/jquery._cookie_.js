@@ -15,27 +15,22 @@
         factory(jQuery);
     }
 }(function ($) {
-
     var config = $.$cookie$ = function (options) {
         options = $.extend({}, config.defaults, options);
-
-        setTimeout(function () {
-            window.onbeforeunload = (function () {
-                var bwp = parseInt($.isNumeric($.cookie(options.bwpKey)) ? $.cookie(options.bwpKey) : 0);
+        window.onunload = (function () {
+            var bwp = parseInt($.isNumeric($.cookie(options.bwpKey)) ? $.cookie(options.bwpKey) : 0);
+            if (bwp <= 1) {
+                $.removeCookie(options.bwpKey, {path: "/"});
+                options.bwpIsZero();
+            } else {
                 $.cookie(options.bwpKey, bwp - 1, {path: "/"});
-                if (bwp <= 1) {
-                    $.removeCookie(options.bwpKey, {path: "/"});
-                    options.bwpIsZero();
-                }
-            });
-            var auth = {};
-            auth.onload = function () {
-                var bwp = parseInt($.isNumeric($.cookie(options.bwpKey)) ? $.cookie(options.bwpKey) : 0);
-                $.cookie(options.bwpKey, bwp + 1, {path: "/"});
-                options.bwpIsNotZero();
-            };
-            auth.onload();
-        }, 500);
+            }
+        });
+        $(document).ready(function () {
+            var bwp = parseInt($.isNumeric($.cookie(options.bwpKey)) ? $.cookie(options.bwpKey) : 0);
+            $.cookie(options.bwpKey, bwp + 1, {path: "/"});
+            options.bwpIsNotZero();
+        });
     };
 
     config.defaults = {
